@@ -1,0 +1,28 @@
+services:
+  # Container 1: The Core Database Engine
+  sqlserver:
+    build: . # 🛠️ Tells Docker to build your local Dockerfile automatically!
+    container_name: mssql_database
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Master_SA_Password123!"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  # Container 2: HTTP-Based Visual T-SQL Query Editor (Bypasses Codespaces 1006 Error)
+  query-editor:
+    image: sqlpad/sqlpad:latest
+    container_name: mssql_visual_editor
+    ports:
+      - "8080:3000" # 🌐 Access your query sheets at http://localhost:8080
+    environment:
+      - SQLPAD_PUBLIC_URL=/
+      - SQLPAD_AUTH_DISABLED=true
+      - SQLPAD_AUTH_DISABLED_DEFAULT_ROLE=admin
+    depends_on:
+      - sqlserver
+
+volumes:
+  mssql_data:
