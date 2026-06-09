@@ -1,7 +1,9 @@
+version: '3.8'
+
 services:
   # Container 1: The Core Database Engine
   sqlserver:
-    build: . # 🛠️ Tells Docker to build your local Dockerfile automatically!
+    build: . # 🛠️ Builds your local Dockerfile automatically!
     container_name: mssql_database
     environment:
       ACCEPT_EULA: "Y"
@@ -11,16 +13,21 @@ services:
     volumes:
       - mssql_data:/var/opt/mssql
 
-  # Container 2: HTTP-Based Visual T-SQL Query Editor (Bypasses Codespaces 1006 Error)
+  # Container 2: Web-Based T-SQL Query Editor via DbGate
   query-editor:
-    image: sqlpad/sqlpad:latest
+    image: dbgate/dbgate:latest
     container_name: mssql_visual_editor
     ports:
-      - "8080:3000" # 🌐 Access your query sheets at http://localhost:8080
+      - "8080:3000" # 🌐 Students access DbGate at http://localhost:8080
     environment:
-      - SQLPAD_PUBLIC_URL=/
-      - SQLPAD_AUTH_DISABLED=true
-      - SQLPAD_AUTH_DISABLED_DEFAULT_ROLE=admin
+      - CONNECTIONS=sqlserver_default
+      - LABEL_sqlserver_default=Local SQL Server
+      - SERVER_sqlserver_default=sqlserver
+      - USER_sqlserver_default=sa
+      - PASSWORD_sqlserver_default=Master_SA_Password123!
+      
+      # 👇 CRITICAL FIX: The explicit plugin identifier string DbGate demands
+      - ENGINE_sqlserver_default=mssql@dbgate-plugin-mssql
     depends_on:
       - sqlserver
 
